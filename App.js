@@ -116,32 +116,34 @@ const PinchComponent = ({
     // const limit = (Math.abs((lastScale.current * windowWidth) - windowWidth) / 2) / lastScale.current
     // const currentX = Math.abs(event.nativeEvent.translationX + lastOffset.current.x)
 
-    const limit = (((lastScale.current * windowWidth) - windowWidth) / 2) / lastScale.current
-    const currentX = event.nativeEvent.translationX + lastOffset.current.x
-    if (Math.abs(limit) <= Math.abs(currentX)) {
-      if (currentX <= 0) {
-        if (pointerEvents === 'auto') {
-          setPointerEvents('none')
-        }
-      } else {
-        console.log('disable for prev page')
-      }
-    } else {
-      translateX.setValue(event.nativeEvent.translationX)
-    }
+    // const limit = (((lastScale.current * windowWidth) - windowWidth) / 2) / lastScale.current
+    // const currentX = event.nativeEvent.translationX + lastOffset.current.x
+    // if (Math.abs(limit) <= Math.abs(currentX)) {
+    //   if (currentX <= 0) {
+    //     if (pointerEvents === 'auto') {
+    //       setPointerEvents('none')
+    //     }
+    //   } else {
+    //     console.log('disable for prev page')
+    //   }
+    // } else {
+    //   translateX.setValue(event.nativeEvent.translationX)
+    // }
 
+    translateX.setValue(event.nativeEvent.translationX)
     translateY.setValue(event.nativeEvent.translationY)
   }
   const onPanHandlerStateChange = (event) => {
-    const limit = (((lastScale.current * windowWidth) - windowWidth) / 2) / lastScale.current
-    const currentX = event.nativeEvent.translationX + lastOffset.current.x
+    // const limit = (((lastScale.current * windowWidth) - windowWidth) / 2) / lastScale.current
+    // const currentX = event.nativeEvent.translationX + lastOffset.current.x
 
-    if (Math.abs(limit) <= Math.abs(currentX)) {
-      lastOffset.current.x = currentX <= 0 ? -limit : limit;
-    } else {
-      lastOffset.current.x += event.nativeEvent.translationX
-    }
+    // if (Math.abs(limit) <= Math.abs(currentX)) {
+    //   lastOffset.current.x = currentX <= 0 ? -limit : limit;
+    // } else {
+    //   lastOffset.current.x += event.nativeEvent.translationX
+    // }
 
+    lastOffset.current.x += event.nativeEvent.translationX
     lastOffset.current.y += event.nativeEvent.translationY
     translateX.setOffset(lastOffset.current.x)
     translateX.setValue(0)
@@ -163,7 +165,7 @@ const PinchComponent = ({
   return (
     <PinchGestureHandler
       ref={pinchRef}
-      // simultaneousHandlers={panRef}
+      simultaneousHandlers={panRef}
       onGestureEvent={isCurrentPage ? parentOnZoomEvent : onZoomEvent}
       onHandlerStateChange={isCurrentPage ? parentHandleHandleStateChange : onPinchHandlerStateChange}
     >
