@@ -5150,6 +5150,11 @@ react-native-codegen@^0.0.6:
     jscodeshift "^0.11.0"
     nullthrows "^1.1.1"
 
+react-native-fast-image@8.3.4:
+  version "8.3.4"
+  resolved "https://registry.yarnpkg.com/react-native-fast-image/-/react-native-fast-image-8.3.4.tgz#79edca177e30311b19d59ff335625bcbe22650d7"
+  integrity sha512-LpzAdjUphihUpVEBn5fEv5AILe55rHav0YiZroPZ1rumKDhAl4u2cG01ku2Pb7l8sayjTsNu7FuURAlXUUDsow==
+
 react-native-fast-image@^8.3.7:
   version "8.3.7"
   resolved "https://registry.yarnpkg.com/react-native-fast-image/-/react-native-fast-image-8.3.7.tgz#c4877de17903101f6d94b6736a4f7e5d7b019224"
@@ -5165,6 +5170,25 @@ react-native-gesture-handler@^1.10.3:
     hoist-non-react-statics "^3.3.0"
     invariant "^2.2.4"
     prop-types "^15.7.2"
+
+react-native-image-modal@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-image-modal/-/react-native-image-modal-2.0.3.tgz#7f9710ffb435fc6196be850b10a157b8e7865489"
+  integrity sha512-BCBAt0AfD/Z42sxlUW4xDugGpClFh+ZOhXk4I+zWtaCGATBHinmDqHQUaEDr2Vo1nkUruIAbiBsTjfj+ulO8Qg==
+  dependencies:
+    react-native-fast-image "8.3.4"
+
+react-native-image-pan-zoom@^2.1.12:
+  version "2.1.12"
+  resolved "https://registry.yarnpkg.com/react-native-image-pan-zoom/-/react-native-image-pan-zoom-2.1.12.tgz#eb98bf56fb5610379bdbfdb63219cc1baca98fd2"
+  integrity sha512-BF66XeP6dzuANsPmmFsJshM2Jyh/Mo1t8FsGc1L9Q9/sVP8MJULDabB1hms+eAoqgtyhMr5BuXV3E1hJ5U5H6Q==
+
+react-native-image-zoom-viewer@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-image-zoom-viewer/-/react-native-image-zoom-viewer-3.0.1.tgz#a2bd5fb3bda15e0686ce88fcde8576726495d7fb"
+  integrity sha512-la6s5DNSuq4GCRLsi5CZ29FPjgTpdCuGIRdO5T9rUrAtxrlpBPhhSnHrbmPVxsdtOUvxHacTh2Gfa9+RraMZQA==
+  dependencies:
+    react-native-image-pan-zoom "^2.1.12"
 
 react-native-modal@^12.0.2:
   version "12.0.2"
