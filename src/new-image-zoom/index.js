@@ -1,35 +1,6 @@
 import React, { useRef } from 'react'
 import { Animated, LayoutChangeEvent, PanResponder, StyleSheet, View } from 'react-native'
 
-const DEFAULT_IMAGE_ZOOM_CONF = {
-  lastPositionX: null,
-  positionX: 0,
-  animatedPositionX: new Animated.Value(0),
-  lastPositionY: null,
-  positionY: 0,
-  animatedPositionY: new Animated.Value(0),
-  scale: 1,
-  animatedScale: new Animated.Value(1),
-  zoomLastDistance: null,
-  zoomCurrentDistance: 0,
-  lastTouchStartTime: 0,
-  horizontalWholeOuterCounter: 0,
-  horizontalWholeCounter: 0,
-  verticalWholeCounter: 0,
-  centerDiffX: 0,
-  centerDiffY: 0,
-  singleClickTimeout: undefined,
-  longPressTimeout: undefined,
-  lastClicktime: 0,
-  doubleClickX: 0,
-  doubleClickY: 0,
-  isDoubleClick: false,
-  isLongPress: false,
-  isHorizontalWrap: false,
-  imagePanResponder: null
-}
-
-
 // TODO didCenterOnChange?
 export const getImageZoomParams = ({
   onPinchStart = () => {},
@@ -60,7 +31,31 @@ export const getImageZoomParams = ({
 }) => {
 
   const imageZoomConf = useRef({
-    ...DEFAULT_IMAGE_ZOOM_CONF
+    lastPositionX: null,
+    positionX: 0,
+    animatedPositionX: new Animated.Value(0),
+    lastPositionY: null,
+    positionY: 0,
+    animatedPositionY: new Animated.Value(0),
+    scale: 1,
+    animatedScale: new Animated.Value(1),
+    zoomLastDistance: null,
+    zoomCurrentDistance: 0,
+    lastTouchStartTime: 0,
+    horizontalWholeOuterCounter: 0,
+    horizontalWholeCounter: 0,
+    verticalWholeCounter: 0,
+    centerDiffX: 0,
+    centerDiffY: 0,
+    singleClickTimeout: undefined,
+    longPressTimeout: undefined,
+    lastClicktime: 0,
+    doubleClickX: 0,
+    doubleClickY: 0,
+    isDoubleClick: false,
+    isLongPress: false,
+    isHorizontalWrap: false,
+    imagePanResponder: null
   })
   const imageZoomConfRef = imageZoomConf.current
 
@@ -69,7 +64,8 @@ export const getImageZoomParams = ({
     onPanResponderTerminationRequest,
     onMoveShouldSetPanResponder,
 
-    onPanResponderGrant: (evt) => {
+    onPanResponderGrant: (evt, gest) => {
+
       imageZoomConfRef.lastPositionX = null
       imageZoomConfRef.lastPositionY = null
       imageZoomConfRef.zoomLastDistance = null
@@ -84,7 +80,9 @@ export const getImageZoomParams = ({
         clearTimeout(imageZoomConfRef.singleClickTimeout)
       }
 
+      console.log('wat is this2222', gest)
       if (evt.nativeEvent.changedTouches.length > 1) {
+        console.log('wat is this')
         onPinchStart()
         const centerX = (evt.nativeEvent.changedTouches[0].pageX + evt.nativeEvent.changedTouches[1].pageX) / 2
         imageZoomConfRef.centerDiffX = centerX - cropWidth / 2
@@ -276,6 +274,7 @@ export const getImageZoomParams = ({
         }
       } else {
 
+        onPinchStart()
         if (imageZoomConfRef.longPressTimeout) {
           clearTimeout(imageZoomConfRef.longPressTimeout)
 
@@ -358,10 +357,6 @@ export const getImageZoomParams = ({
           }
         }, doubleClickInterval)
       } else {
-        if (responderRelease) {
-          responderRelease(gestureState.vx, this.scale);
-        }
-
         if (enableCenterFocus && imageZoomConfRef.scale < 1) {
           imageZoomConfRef.scale = 1
           Animated.timing(imageZoomConfRef.animatedScale, {
@@ -432,7 +427,11 @@ export const getImageZoomParams = ({
             useNativeDriver: !!useNativeDriver,
           }).start()
         }
-    
+
+        if (responderRelease) {
+          responderRelease(gestureState.vx, imageZoomConfRef.scale);
+        }
+
         imageZoomConfRef.horizontalWholeOuterCounter = 0
     
         // this.imageDidMove('onPanResponderRelease');
@@ -484,7 +483,8 @@ export const ImageZoom = ({
   } = parentImageZoomParams ? parentImageZoomParams : getImageZoomParams({
     ...props
   })
-
+  
+  console.log(animateConf)
   return (
     <View 
       style={{
