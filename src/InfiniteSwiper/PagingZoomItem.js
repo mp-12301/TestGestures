@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react'
+import React, { useRef } from 'react'
 import { Animated, LayoutChangeEvent, PanResponder, StyleSheet, View } from 'react-native'
 
 // TODO didCenterOnChange?
@@ -454,18 +454,18 @@ export const getImageZoomParams = ({
     ],
   }
 
-  const resetScale = useCallback(()=> {
+  const resetScale = () => {
     imageZoomConfRef.positionX = 0;
     imageZoomConfRef.positionY = 0;
     imageZoomConfRef.scale = 1;
     imageZoomConfRef.animatedScale.setValue(1);
-  }, []);
+  }
 
   return {
     imagePanResponder,
     animateConf,
     useHardwareTextureAndroid,
-    resetScale,
+    resetScale
   }
 }
 

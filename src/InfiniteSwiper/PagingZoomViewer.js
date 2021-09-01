@@ -1,14 +1,10 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import {
   View,
   Animated,
   Dimensions,
-  StyleSheet,
 } from 'react-native'
-
-import ImageZoom from '../new-image-zoom/index'
-import FastImage from 'react-native-fast-image'
 
 const useNativeDriver = true
 const flipThreshold = 80
@@ -17,7 +13,8 @@ const pageAnimateTime = 100
 export const usePageViewer = ({
   imageUrls,
   width,
-  initialPage = 0
+  initialPage = 0,
+  currentPage,
 }) => {
   const pageViewerPropsRef = useRef({
     standardPositionX: - (initialPage + 1) * width,
@@ -26,8 +23,13 @@ export const usePageViewer = ({
     currentIndex: initialPage + 1,
   })
 
+  useEffect(() => {
+    jumpToPage(currentPage)
+
+  }, [currentPage])
+
   const jumpToPage = (index) => {
-    pageViewerPropsRef.current.positionXNumber = width * index
+    pageViewerPropsRef.current.positionXNumber = - width * index
     pageViewerPropsRef.standardPositionX = pageViewerPropsRef.current.positionXNumber
     pageViewerPropsRef.current.positionX.setValue(pageViewerPropsRef.current.positionXNumber)
   }

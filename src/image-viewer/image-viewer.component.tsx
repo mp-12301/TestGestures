@@ -16,7 +16,7 @@ import {
   ViewStyle
 } from 'react-native';
 // import ImageZoom from '../new-image-zoom';
-import ImageZoom from 'react-native-image-pan-zoom';
+import ImageZoom from '../image-zoom/image-zoom.component'
 import styles from './image-viewer.style';
 import { IImageInfo, IImageSize, Props, State } from './image-viewer.type';
 

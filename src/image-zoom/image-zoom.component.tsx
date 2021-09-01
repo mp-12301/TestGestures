@@ -187,7 +187,9 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
         return;
       }
 
-      if (evt.nativeEvent.changedTouches.length <= 1) {
+
+      console.log(evt.nativeEvent.changedTouches, evt.nativeEvent.touches)
+      if (evt.nativeEvent.touches.length <= 1) {
         // x 位移
         let diffX = gestureState.dx - (this.lastPositionX || 0);
         if (this.lastPositionX === null) {
@@ -360,22 +362,22 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
           // 找最小的 x 和最大的 x
           let minX: number;
           let maxX: number;
-          if (evt.nativeEvent.changedTouches[0].locationX > evt.nativeEvent.changedTouches[1].locationX) {
-            minX = evt.nativeEvent.changedTouches[1].pageX;
-            maxX = evt.nativeEvent.changedTouches[0].pageX;
+          if (evt.nativeEvent.touches[0].locationX > evt.nativeEvent.touches[1].locationX) {
+            minX = evt.nativeEvent.touches[1].pageX;
+            maxX = evt.nativeEvent.touches[0].pageX;
           } else {
-            minX = evt.nativeEvent.changedTouches[0].pageX;
-            maxX = evt.nativeEvent.changedTouches[1].pageX;
+            minX = evt.nativeEvent.touches[0].pageX;
+            maxX = evt.nativeEvent.touches[1].pageX;
           }
 
           let minY: number;
           let maxY: number;
-          if (evt.nativeEvent.changedTouches[0].locationY > evt.nativeEvent.changedTouches[1].locationY) {
-            minY = evt.nativeEvent.changedTouches[1].pageY;
-            maxY = evt.nativeEvent.changedTouches[0].pageY;
+          if (evt.nativeEvent.touches[0].locationY > evt.nativeEvent.touches[1].locationY) {
+            minY = evt.nativeEvent.touches[1].pageY;
+            maxY = evt.nativeEvent.touches[0].pageY;
           } else {
-            minY = evt.nativeEvent.changedTouches[0].pageY;
-            maxY = evt.nativeEvent.changedTouches[1].pageY;
+            minY = evt.nativeEvent.touches[0].pageY;
+            maxY = evt.nativeEvent.touches[1].pageY;
           }
 
           const widthDistance = maxX - minX;
@@ -384,7 +386,6 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
           this.zoomCurrentDistance = Number(diagonalDistance.toFixed(1));
 
           if (this.zoomLastDistance !== null) {
-            console.log('pinch?')
             const distanceDiff = (this.zoomCurrentDistance - this.zoomLastDistance) / 200;
             let zoom = this.scale + distanceDiff;
 
@@ -567,9 +568,6 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
   };
 
   public componentDidMount(): void {
-
-  console.log('derp')
-    this.props.setImagePanResponders(this.imagePanResponder)
     if (this.props.centerOn) {
       this.centerOn(this.props.centerOn);
     }
@@ -668,7 +666,6 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
 
     const parentStyles = StyleSheet.flatten(this.props.style);
 
-    console.log('derp')
     return (
       <View
         style={{
