@@ -174,7 +174,7 @@ export const getImageZoomParams = ({
         return
       }
 
-      if (evt.nativeEvent.changedTouches.length <= 1) {
+      if (evt.nativeEvent.touches.length <= 1) {
          let diffX = gestureState.dx - (imageZoomConfRef.lastPositionX || 0);
          if (imageZoomConfRef.lastPositionX === null) {
            diffX = 0;
@@ -277,55 +277,55 @@ export const getImageZoomParams = ({
           clearTimeout(imageZoomConfRef.longPressTimeout)
 
           if (pinchToZoom) {
-          let minX
-          let maxX
-          if (evt.nativeEvent.changedTouches[0].locationX > evt.nativeEvent.changedTouches[1].locationX) {
-            minX = evt.nativeEvent.changedTouches[1].pageX
-            maxX = evt.nativeEvent.changedTouches[0].pageX
-          } else {
-            minX = evt.nativeEvent.changedTouches[0].pageX
-            maxX = evt.nativeEvent.changedTouches[1].pageX
-          }
-
-          let minY
-          let maxY
-          if (evt.nativeEvent.changedTouches[0].locationY > evt.nativeEvent.changedTouches[1].locationY) {
-            minY = evt.nativeEvent.changedTouches[1].pageY
-            maxY = evt.nativeEvent.changedTouches[0].pageY
-          } else {
-            minY = evt.nativeEvent.changedTouches[0].pageY
-            maxY = evt.nativeEvent.changedTouches[1].pageY
-          }
-
-          const widthDistance = maxX - minX
-          const heightDistance = maxY - minY
-          const diagonalDistance = Math.sqrt(widthDistance * widthDistance + heightDistance * heightDistance)
-          imageZoomConfRef.zoomCurrentDistance = Number(diagonalDistance.toFixed(1))
-
-          if (imageZoomConfRef.zoomLastDistance !== null) {
-            const distanceDiff = (imageZoomConfRef.zoomCurrentDistance - imageZoomConfRef.zoomLastDistance) / 200
-            let zoom = imageZoomConfRef.scale + distanceDiff
-
-            if (zoom < (minScale || 0)) {
-              zoom = minScale || 0
-            }
-            if (zoom > (maxScale || 0)) {
-              zoom = maxScale || 0
+            let minX
+            let maxX
+            if (evt.nativeEvent.touches[0].locationX > evt.nativeEvent.touches[1].locationX) {
+              minX = evt.nativeEvent.touches[1].pageX
+              maxX = evt.nativeEvent.touches[0].pageX
+            } else {
+              minX = evt.nativeEvent.touches[0].pageX
+              maxX = evt.nativeEvent.touches[1].pageX
             }
 
-            const beforeScale = imageZoomConfRef.scale
+            let minY
+            let maxY
+            if (evt.nativeEvent.touches[0].locationY > evt.nativeEvent.touches[1].locationY) {
+              minY = evt.nativeEvent.touches[1].pageY
+              maxY = evt.nativeEvent.touches[0].pageY
+            } else {
+              minY = evt.nativeEvent.touches[0].pageY
+              maxY = evt.nativeEvent.touches[1].pageY
+            }
 
-            imageZoomConfRef.scale = zoom
-            imageZoomConfRef.animatedScale.setValue(imageZoomConfRef.scale)
+            const widthDistance = maxX - minX
+            const heightDistance = maxY - minY
+            const diagonalDistance = Math.sqrt(widthDistance * widthDistance + heightDistance * heightDistance)
+            imageZoomConfRef.zoomCurrentDistance = Number(diagonalDistance.toFixed(1))
 
-            const diffScale = imageZoomConfRef.scale - beforeScale
+            if (imageZoomConfRef.zoomLastDistance !== null) {
+              const distanceDiff = (imageZoomConfRef.zoomCurrentDistance - imageZoomConfRef.zoomLastDistance) / 200
+              let zoom = imageZoomConfRef.scale + distanceDiff
 
-            imageZoomConfRef.positionX -= (imageZoomConfRef.centerDiffX * diffScale) / imageZoomConfRef.scale;
-            imageZoomConfRef.positionY -= (imageZoomConfRef.centerDiffY * diffScale) / imageZoomConfRef.scale;
-            imageZoomConfRef.animatedPositionX.setValue(imageZoomConfRef.positionX);
-            imageZoomConfRef.animatedPositionY.setValue(imageZoomConfRef.positionY);
-          }
-          imageZoomConfRef.zoomLastDistance = imageZoomConfRef.zoomCurrentDistance;
+              if (zoom < (minScale || 0)) {
+                zoom = minScale || 0
+              }
+              if (zoom > (maxScale || 0)) {
+                zoom = maxScale || 0
+              }
+
+              const beforeScale = imageZoomConfRef.scale
+
+              imageZoomConfRef.scale = zoom
+              imageZoomConfRef.animatedScale.setValue(imageZoomConfRef.scale)
+
+              const diffScale = imageZoomConfRef.scale - beforeScale
+
+              imageZoomConfRef.positionX -= (imageZoomConfRef.centerDiffX * diffScale) / imageZoomConfRef.scale;
+              imageZoomConfRef.positionY -= (imageZoomConfRef.centerDiffY * diffScale) / imageZoomConfRef.scale;
+              imageZoomConfRef.animatedPositionX.setValue(imageZoomConfRef.positionX);
+              imageZoomConfRef.animatedPositionY.setValue(imageZoomConfRef.positionY);
+            }
+            imageZoomConfRef.zoomLastDistance = imageZoomConfRef.zoomCurrentDistance;
           }
         }
       }
@@ -355,6 +355,10 @@ export const getImageZoomParams = ({
           }
         }, doubleClickInterval)
       } else {
+        if (responderRelease) {
+          responderRelease(gestureState.vx, imageZoomConfRef.scale);
+        }
+
         if (enableCenterFocus && imageZoomConfRef.scale < 1) {
           imageZoomConfRef.scale = 1
           Animated.timing(imageZoomConfRef.animatedScale, {
@@ -426,10 +430,6 @@ export const getImageZoomParams = ({
           }).start()
         }
 
-        if (responderRelease) {
-          responderRelease(gestureState.vx, imageZoomConfRef.scale);
-        }
-
         imageZoomConfRef.horizontalWholeOuterCounter = 0
     
         // this.imageDidMove('onPanResponderRelease');
@@ -473,6 +473,7 @@ export const ImageZoom = ({
   parentImageZoomParams,
   children,
   withZoom = true,
+  offsetY = 0,
   ...props
 }) => {
   const {
@@ -482,17 +483,24 @@ export const ImageZoom = ({
   } = parentImageZoomParams ? parentImageZoomParams : getImageZoomParams({
     ...props
   })
+
+  const pagingZoomItemStyle = {
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+    width: props.cropWidth,
+    height: props.cropHeight,
+  }
+
+  if (offsetY) {
+    pagingZoomItemStyle.paddingTop = offsetY
+  } else {
+    pagingZoomItemStyle.justifyContent = 'center'
+    pagingZoomItemStyle.alignItems = 'center'
+  }
   
   return (
     <View 
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-        backgroundColor: 'transparent',
-        width: props.cropWidth,
-        height: props.cropHeight
-      }}
+      style={pagingZoomItemStyle}
       {...imagePanResponder.panHandlers}
     >
       { withZoom ? 

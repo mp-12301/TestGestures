@@ -27,19 +27,36 @@ const App = () => {
     }, {
       url: 'https://i.picsum.photos/id/1023/3955/2094.jpg?hmac=AW_7mARdoPWuI7sr6SG8t-2fScyyewuNscwMWtQRawU',
   }]
+  const screenWidth = Dimensions.get('window').width
+  const cropHeight = Dimensions.get('window').height
 
   return (
     <View style={styles.container}>
 
       <InfiniteSwiper 
-        images={images}
-        pagingStyle={styles.container}
-        pagingWidth={300}
+        style={{
+          width: screenWidth,
+          height: 300
+        }}
+        width={screenWidth}
         pagingHeight={300}
         enablePressAreas={false}
         onIndexChanged={() => {}}
         loop
-      /> 
+        zoom
+      >
+        {
+          images.map((image, i) => {
+            return (
+              <FastImage
+                key={i}
+                style={{width: screenWidth, height: 300}}
+                source={{uri: image.url}}
+              />
+            )
+          })
+        }
+      </InfiniteSwiper>
 
       {/* <PagingZoomItem
         cropWidth={400}
@@ -60,8 +77,7 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
+    paddingTop: 300
   },
 });
 

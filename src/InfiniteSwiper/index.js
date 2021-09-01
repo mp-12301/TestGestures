@@ -1,92 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   Dimensions,
   TouchableOpacity,
+  Image,
 } from 'react-native'
 import Modal from 'react-native-modal'
-import FastImage from 'react-native-fast-image'
 
-import ImageZoom, { getImageZoomParams } from './PagingZoomItem'
+import PageZoomItem, { getImageZoomParams } from './PagingZoomItem'
 import PageViewer, { usePageViewer } from './PagingZoomViewer'
 import Paging from './Paging'
 
 const crossIcon = require('./close-icon.jpeg')
 
 const InfiniteSwiper = ({
-  images = [],
-  pagingStyle,
-  pagingWidth,
-  pagingHeight,
+  style,
+  width,
+  height,
   onIndexChanged,
-  loop
+  loop = true,
+  zoom = false,
+  zoomOffsetY = 0,
+  children = [],
 }) => {
   const [show, setShow] = useState(false)
   const [page, setPage] = useState(0)
+
+  const isShowing = useRef(false)
 
   const {
     positionX,
     handleHorizontalOuterRangeOffset,
     handleResponderRelease,
   } = usePageViewer({
-    imageUrls: images,
+    loop,
+    length: children.length,
     width: Dimensions.get('window').width,
-    currentPage: page + 1,
+    currentPage: page,
+    show,
   })
 
   const cropWidth = Dimensions.get('window').width
   const cropHeight = Dimensions.get('window').height
   const imageWidth = cropWidth
-  const imageHeight = 300
+  const imageHeight = height
 
   const imageZoomParams = getImageZoomParams({
     cropWidth,
     cropHeight,
     imageWidth,
     imageHeight,
-    onPinchStart: () => {
-      setShow(true)
-    },
     responderRelease: handleResponderRelease,
     horizontalOuterRangeOffset: handleHorizontalOuterRangeOffset,
+    onStartShouldSetPanResponder: (evt, gest) => {
+      if (gest.numberActiveTouches > 1) {
+        isShowing.current = true
+        setShow(true)
+        return true
+      } else {
+        return isShowing.current
+      }
+    }
   })
 
-  return <View style={styles.container}>
+  return <View 
+    style={styles.container} 
+  >
     <View
-      style={pagingStyle}
+      style={style}
       {...imageZoomParams.imagePanResponder.panHandlers}
     >
       <Paging 
         loop={loop}
-        width={pagingWidth}
-        height={pagingHeight}
-        style={pagingStyle}
+        width={width}
+        height={height}
+        style={style}
         onIndexChanged={(page) => {
           setPage(page)
           onIndexChanged(page)
         }}
       >
-        { images.map((image, i) => {
-          return (
-            <FastImage
-              key={i}
-              style={{width: pagingWidth, height: pagingHeight}}
-              source={{uri: image.url}}
-            />
-          )
-        }) }
+        { children }
       </Paging>
     </View>
-
-    {/* <Text>Page {page + 1}</Text> */}
     
-    <Modal 
+    {
+
+    }
+    {zoom && <Modal 
       style={{margin: 0}} 
-      onDismiss={() => {
-        imageZoomParams.resetScale()
-      }}
       isVisible={show}
       backdropColor="#FFFFFF"
       backdropOpacity={1}
@@ -97,17 +101,25 @@ const InfiniteSwiper = ({
       backdropTransitionInTiming={600}
       backdropTransitionOutTiming={600}
     >
-      <TouchableOpacity onPress={() => setShow(false)} style={{zIndex: 10, position: 'absolute', top: 60, left: 20 }}>
-        <FastImage source={crossIcon} style={{width: 30, height: 30}} />
+      <TouchableOpacity 
+        onPress={() => {
+          setShow(false)
+          imageZoomParams.resetScale()
+          isShowing.current = false
+        }} 
+        style={{zIndex: 10, position: 'absolute', top: 60, left: 20 }}
+      >
+        <Image source={crossIcon} style={{width: 30, height: 30}} />
       </TouchableOpacity >
       <PageViewer 
-        imageUrls={images}
+        loop={loop}
         positionX={positionX}
       >
-        { images.map((image, i) => {
+        { children.map((child, i) => {
           return (
-            <ImageZoom
+            <PageZoomItem
               key={i}
+              offsetY={zoomOffsetY}
               cropWidth={cropWidth}
               cropHeight={cropHeight}
               imageWidth={imageWidth}
@@ -116,29 +128,19 @@ const InfiniteSwiper = ({
               horizontalOuterRangeOffset={handleHorizontalOuterRangeOffset}
               parentImageZoomParams={i === page ? imageZoomParams : null}
             >
-              <FastImage
-                style={{width: imageWidth, height: imageHeight}}
-                source={{uri: image.url}}
-              />
-            </ImageZoom>
+              { child }
+            </PageZoomItem>
           )
         })}
       </PageViewer>
-    </Modal>
+    </Modal> }
   </View>
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
   },
-  viewPager: {
-    width: '100%',
-    height: 300,
-  }
 })
 
 export default InfiniteSwiper

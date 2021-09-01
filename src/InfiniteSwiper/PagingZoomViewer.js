@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useMemo } from 'react'
 
 import {
   View,
@@ -11,31 +11,37 @@ const flipThreshold = 80
 const pageAnimateTime = 100
 
 export const usePageViewer = ({
-  imageUrls,
+  length,
   width,
   initialPage = 0,
   currentPage,
+  loop,
+  show
 }) => {
+
+  const initialPageDetermined = useMemo(() => loop ? initialPage + 1 : initialPage, [loop, initialPage])
+  const currentPageDetermined = useMemo(() => loop ? currentPage + 1: currentPage, [loop, currentPage])
+
   const pageViewerPropsRef = useRef({
-    standardPositionX: - (initialPage + 1) * width,
-    positionXNumber: - (initialPage + 1) * width,
-    positionX: new Animated.Value( - (initialPage + 1) * width),
-    currentIndex: initialPage + 1,
+    standardPositionX: - (initialPageDetermined) * width,
+    positionXNumber: - (initialPageDetermined) * width,
+    positionX: new Animated.Value( - (initialPageDetermined) * width),
+    currentIndex: initialPageDetermined,
   })
 
   useEffect(() => {
-    jumpToPage(currentPage)
-
-  }, [currentPage])
+    jumpToPage(currentPageDetermined)
+    
+  }, [currentPageDetermined, show])
 
   const jumpToPage = (index) => {
+    pageViewerPropsRef.current.currentIndex = index
     pageViewerPropsRef.current.positionXNumber = - width * index
-    pageViewerPropsRef.standardPositionX = pageViewerPropsRef.current.positionXNumber
+    pageViewerPropsRef.current.standardPositionX = pageViewerPropsRef.current.positionXNumber
     pageViewerPropsRef.current.positionX.setValue(pageViewerPropsRef.current.positionXNumber)
   }
 
   const handleHorizontalOuterRangeOffset = (offsetX) => {
-    console.log('horizontal', offsetX)
     pageViewerPropsRef.current.positionXNumber = pageViewerPropsRef.current.standardPositionX + offsetX
     pageViewerPropsRef.current.positionX.setValue(pageViewerPropsRef.current.positionXNumber)
   }
@@ -61,10 +67,10 @@ export const usePageViewer = ({
   }
 
   const goBack = () => {
-    // if (pageViewerPropsRef.current.currentIndex === 0) {
-    //   resetPosition()
-    //   return
-    // }
+    if (!loop && pageViewerPropsRef.current.currentIndex === 0) {
+      resetPosition()
+      return
+    }
 
     pageViewerPropsRef.current.positionXNumber = pageViewerPropsRef.current.standardPositionX + width
     pageViewerPropsRef.current.standardPositionX = pageViewerPropsRef.current.positionXNumber
@@ -75,9 +81,9 @@ export const usePageViewer = ({
       useNativeDriver: useNativeDriver
     }).start(
       () => {
-        if (pageViewerPropsRef.current.currentIndex === 0) {
-          pageViewerPropsRef.current.positionXNumber = - (imageUrls.length) * width
-          pageViewerPropsRef.current.currentIndex = imageUrls.length
+        if (loop && pageViewerPropsRef.current.currentIndex === 0) {
+          pageViewerPropsRef.current.positionXNumber = - (length) * width
+          pageViewerPropsRef.current.currentIndex = length
           pageViewerPropsRef.current.standardPositionX = pageViewerPropsRef.current.positionXNumber
           pageViewerPropsRef.current.positionX.setValue(pageViewerPropsRef.current.positionXNumber)
         }
@@ -88,10 +94,10 @@ export const usePageViewer = ({
   }
 
   const goNext = () => {
-    // if (currentIndex === imageUrls.length - 1 + 4) {
-    //   resetPosition()
-    //   return
-    // }
+    if (!loop && pageViewerPropsRef.current.currentIndex === length - 1) {
+      resetPosition()
+      return
+    }
 
     pageViewerPropsRef.current.positionXNumber = pageViewerPropsRef.current.standardPositionX - width
     pageViewerPropsRef.current.standardPositionX = pageViewerPropsRef.current.positionXNumber
@@ -101,7 +107,7 @@ export const usePageViewer = ({
       useNativeDriver: useNativeDriver
     }).start(
       () => {
-        if (pageViewerPropsRef.current.currentIndex === imageUrls.length + 1) {
+        if (loop && pageViewerPropsRef.current.currentIndex === length + 1) {
           pageViewerPropsRef.current.positionXNumber = - width
           pageViewerPropsRef.current.currentIndex = 1
           pageViewerPropsRef.current.standardPositionX = pageViewerPropsRef.current.positionXNumber
@@ -129,17 +135,11 @@ export const usePageViewer = ({
 }
 
 export const PageViewer = ({
-  imageUrls = [],
   positionX,
   children,
-  loop = true,
+  loop,
 }) => {
-
-  if (loop && children.length) {
-
-  }
-
-  const imageZoomElements = (loop && children.length) > 1 ? 
+  const imageZoomElements = (loop && children.length > 1) ? 
       [
         children[children.length - 1], 
         ...children, 
@@ -154,8 +154,7 @@ export const PageViewer = ({
         overflow: 'hidden',
       }}
     >
-
-<Animated.View style={{ zIndex: 9 }}>
+      <Animated.View style={{ zIndex: 9, flex: 1 }}>
         <Animated.View
           style={{
             transform: [{
@@ -163,12 +162,11 @@ export const PageViewer = ({
             }],
             width: Dimensions.get('window').width * imageZoomElements.length,
             flexDirection: 'row', 
-            alignItems: 'center'
           }}
         >
           { imageZoomElements.map((el, i) => <View key={i}>{el}</View>) }
         </Animated.View>
-        </Animated.View>
+      </Animated.View>
     </View>
   )
 }
